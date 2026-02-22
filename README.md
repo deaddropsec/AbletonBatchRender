@@ -13,16 +13,15 @@ The tool has two parts:
 ```
 ┌─────────────────────────┐     TCP 9877     ┌──────────────────────────┐
 │                         │ ◄──────────────► │                          │
-│   CLI (Python)          │   GET/SET/STATUS  │   Ableton Live           │
-│                         │                   │   + RenderMonitor        │
-│   • Parse .als XML      │                   │     Remote Script        │
+│   CLI (Python)          │   GET/SET/STATUS │   Ableton Live           │
+│                         │                  │   + RenderMonitor        │
+│   • Parse .als XML      │                  │     Remote Script        │
 │   • Resolve samples     │ ◄──────────────► │                          │
-│   • Send keystrokes     │   JXA/osascript   │   • Dialog state         │
-│   • Monitor progress    │                   │   • Transport control    │
-│                         │                   │   • File path reporting  │
-└─────────────────────────┘                   └──────────────────────────┘
+│   • Send keystrokes     │   JXA/osascript  │   • Dialog state         │
+│   • Monitor progress    │                  │   • Transport control    │
+│                         │                  │   • File path reporting  │
+└─────────────────────────┘                  └──────────────────────────┘
 ```
-
 ## Prerequisites
 
 - **macOS** (uses JXA/osascript for keyboard automation)
