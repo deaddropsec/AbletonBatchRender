@@ -2,6 +2,12 @@
 
 Batch export Ableton Live projects to audio files without manual interaction. Point it at a folder of `.als` files, and it renders them one by one — parsing content length, setting loop boundaries, triggering export, and monitoring progress.
 
+> **Beta** — This tool is under active development. Please read the following before use:
+>
+> - **Work on copies.** The tool is read-only on your `.als` files (patched copies are temporary and cleaned up automatically), but you should still run it on copies of your projects until you're confident in the results.
+> - **Missing plugins cannot be resolved.** If a project relies on plugins that are no longer available (e.g. VST2 migrated to VST3, discontinued plugins), Ableton will show a missing-plugin dialog that the tool cannot dismiss. The render will stall.
+> - **Use a clean export directory.** If an exported file already exists, Ableton shows an "overwrite" confirmation sheet. This prompt is not handled automatically to prevent accidental data loss — the script will idle indefinitely waiting for the render to finish. Make sure the export folder you configure in Ableton is empty or doesn't contain files with the same names as your projects.
+
 ## How It Works
 
 The tool has two parts:
@@ -81,7 +87,7 @@ Batch render all projects in a directory:
 python main.py path/to/projects/ --export-dir ~/Music/Exports
 ```
 
-The `--export-dir` flag enables post-render verification (checks that the exported file exists).
+The `--export-dir` flag does **not** set the export directory — that must be configured in Ableton's export dialog (see Setup step 4). This flag only tells the CLI where to look for the exported file so it can verify the render succeeded.
 
 ## Remote Script Protocol
 
