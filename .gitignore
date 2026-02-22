@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Ableton
+*.als
+*.wav
+*.aif
+*.aiff
+*.mp3
+*.flac
+*.cfg
+
+# Project
+config.json
+
+# Worktrees
+.worktrees/
