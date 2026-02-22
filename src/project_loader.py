@@ -57,8 +57,12 @@ def open_project_in_ableton(
         client: Connected RenderMonitorClient.
         timeout: Maximum seconds to wait for project to load.
     """
+    resolved_path = als_path.resolve()
+    if resolved_path.suffix != ".als":
+        raise ValueError(f"Symlink target is not an .als file: {resolved_path}")
+
     print(f"  Opening: {als_path.name}")
-    subprocess.run(["open", str(als_path)], capture_output=True, timeout=10)
+    subprocess.run(["open", str(resolved_path)], capture_output=True, timeout=10)
 
     deadline = time.monotonic() + timeout
 

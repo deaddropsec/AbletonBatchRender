@@ -7,6 +7,7 @@ batch processing loop, and summary output.
 import argparse
 import sys
 import time
+import traceback
 from pathlib import Path
 
 from src.automation import is_ableton_running, launch_ableton
@@ -126,6 +127,7 @@ def _run_batch(
             except Exception as e:
                 results[als_path.name] = False
                 print(f"  ERROR: {als_path.name}: {e}")
+                traceback.print_exc(file=sys.stderr)
     finally:
         client.close()
     return results

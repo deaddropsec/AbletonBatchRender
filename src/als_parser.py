@@ -6,6 +6,7 @@ sample references.
 """
 
 import gzip
+import io
 from copy import deepcopy
 from pathlib import Path
 
@@ -28,6 +29,10 @@ AUDIO_EXTENSIONS = frozenset({
     ".ogg", ".m4a", ".aac", ".wma",
 })
 
+# Safety limits for .als files
+MAX_COMPRESSED_SIZE = 200 * 1024 * 1024  # 200 MB compressed
+MAX_DECOMPRESSED_SIZE = 500 * 1024 * 1024  # 500 MB decompressed
+
 
 def parse_als(path: Path) -> etree._ElementTree:
     """Decompress and parse an .als file into an XML tree.
@@ -40,6 +45,7 @@ def parse_als(path: Path) -> etree._ElementTree:
 
     Raises:
         FileNotFoundError: If the .als file doesn't exist.
+        ValueError: If the file exceeds size limits.
         gzip.BadGzipFile: If the file is not valid gzip.
         etree.XMLSyntaxError: If the decompressed content is not valid XML.
     """
@@ -47,9 +53,33 @@ def parse_als(path: Path) -> etree._ElementTree:
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
+    file_size = path.stat().st_size
+    if file_size > MAX_COMPRESSED_SIZE:
+        raise ValueError(
+            f"File too large ({file_size} bytes, max {MAX_COMPRESSED_SIZE}): {path}"
+        )
+
+    xml_bytes = _decompress_with_limit(path, MAX_DECOMPRESSED_SIZE)
     parser = etree.XMLParser(huge_tree=True)
+    return etree.parse(io.BytesIO(xml_bytes), parser)
+
+
+def _decompress_with_limit(path: Path, max_size: int) -> bytes:
+    """Decompress a gzip file with a size limit to prevent zip bombs."""
+    chunks = []
+    total = 0
     with gzip.open(path, "rb") as f:
-        return etree.parse(f, parser)
+        while True:
+            chunk = f.read(1024 * 1024)  # 1 MB chunks
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > max_size:
+                raise ValueError(
+                    f"Decompressed size exceeds limit ({max_size} bytes): {path}"
+                )
+            chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def get_project_length(tree: etree._ElementTree) -> float:

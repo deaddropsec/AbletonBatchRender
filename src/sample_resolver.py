@@ -38,6 +38,12 @@ def load_config(config_path: str = "config.json") -> dict:
     if not isinstance(search_paths, list) or not search_paths:
         raise ValueError("'sample_search_paths' must be a non-empty list")
 
+    for sp in search_paths:
+        if not isinstance(sp, str):
+            raise ValueError(f"Search path must be a string, got {type(sp).__name__}")
+        if not Path(sp).is_absolute():
+            raise ValueError(f"Search path must be absolute: {sp}")
+
     return config
 
 

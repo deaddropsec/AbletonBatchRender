@@ -3,6 +3,12 @@
 Connects to the RenderMonitor running inside Ableton Live and
 queries the current dialog state to detect rendering progress
 and completion.
+
+Security note: This client communicates over plaintext TCP on localhost.
+There is no authentication or encryption. Any local process can connect
+to the RenderMonitor port and issue commands. This is an inherent
+limitation of Ableton's Remote Script architecture and is acceptable
+for a single-user local tool.
 """
 
 import socket
@@ -189,6 +195,10 @@ class RenderMonitorClient:
     def _send_command(self, command: str) -> str:
         """Send a command and read the response line.
 
+        Uses newline-delimited framing to handle TCP stream semantics
+        correctly (responses may be split across recv() calls or
+        multiple responses may arrive in a single recv()).
+
         Raises:
             ConnectionError: If not connected.
             TimeoutError: If no response within socket timeout.
@@ -197,12 +207,22 @@ class RenderMonitorClient:
             raise ConnectionError("Not connected to RenderMonitor")
 
         self._socket.sendall((command + "\n").encode("utf-8"))
-        data = self._socket.recv(RECV_BUFFER)
+        return self._read_line()
 
-        if not data:
-            raise ConnectionError("RenderMonitor closed the connection")
+    def _read_line(self) -> str:
+        """Read bytes until a newline delimiter is found.
 
-        return data.decode("utf-8").strip()
+        Raises:
+            ConnectionError: If the remote end closes the connection.
+        """
+        buf = b""
+        while b"\n" not in buf:
+            chunk = self._socket.recv(RECV_BUFFER)
+            if not chunk:
+                raise ConnectionError("RenderMonitor closed the connection")
+            buf += chunk
+        line, _, _ = buf.partition(b"\n")
+        return line.decode("utf-8").strip()
 
 
 def _parse_status(response: str) -> RenderStatus:

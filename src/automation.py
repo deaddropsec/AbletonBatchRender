@@ -7,8 +7,16 @@ All functions are stateless and target the app by name/process name.
 import subprocess
 import time
 
-ABLETON_APP_NAME = "Ableton Live 12 Suite"
-ABLETON_PROCESS_NAME = "Live"
+
+def _validate_jxa_safe(name: str, label: str) -> str:
+    """Ensure a string is safe for interpolation into JXA source."""
+    if not all(c.isalnum() or c in " .-_" for c in name):
+        raise ValueError(f"Unsafe JXA {label}: {name!r}")
+    return name
+
+
+ABLETON_APP_NAME = _validate_jxa_safe("Ableton Live 12 Suite", "app name")
+ABLETON_PROCESS_NAME = _validate_jxa_safe("Live", "process name")
 LAUNCH_TIMEOUT = 60.0
 LAUNCH_POLL_INTERVAL = 2.0
 
@@ -154,6 +162,11 @@ def wait_for_sheet_and_confirm(timeout: float = 5.0, poll: float = 0.3) -> str:
         "no_sheet" if no sheet appeared (no overwrite needed),
         "error:<msg>" on failure.
     """
+    timeout = float(timeout)
+    poll = float(poll)
+    if timeout <= 0 or poll <= 0:
+        raise ValueError("timeout and poll must be positive")
+
     script = """
     (function() {
         const se = Application("System Events");
