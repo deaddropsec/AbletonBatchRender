@@ -28,6 +28,11 @@ The tool has two parts:
 - **macOS** (uses JXA/osascript for keyboard automation)
 - **Ableton Live 12 Suite**
 - **Python 3.11+**
+- **ripgrep** (optional, recommended) — used for fast sample resolution; falls back to BSD `find` if not installed
+
+```bash
+brew install ripgrep
+```
 
 ## Setup
 
